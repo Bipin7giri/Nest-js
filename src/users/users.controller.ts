@@ -9,12 +9,21 @@ import {
   UsePipes,
   ValidationPipe,
   Request,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDto, LoginDto } from 'src/users/dto/create-user.dto';
+import {
+  AdminAuto,
+  CreateUserDto,
+  LoginDto,
+} from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from 'src/auth/auth.service';
+import { HasRoles } from 'src/auth/has-roles.decorator';
+import { RolesGuard } from 'src/auth/roles.guard';
+// import { Role } from './entities/user.entity';
+import { Role } from '../constants/roles.enum';
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
@@ -23,7 +32,8 @@ export class UsersController {
     private authService: AuthService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @HasRoles(Role.User)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get()
   getUsers(@Request() req) {
     return this.userService.getUsers();
@@ -43,8 +53,17 @@ export class UsersController {
   @Post('auth/login')
   @UsePipes(ValidationPipe)
   async login(@Request() req, @Body() loginDto: LoginDto) {
-    console.log(req.user);
     return this.authService.login(req.user);
     return req.user;
+  }
+
+  @Post('/automigrate')
+  async RunScript(@Body() autoMigrate: AdminAuto): Promise<any> {
+    const key = 123456;
+    if (autoMigrate.key === key) {
+      await this.userService.scriptDb();
+    } else {
+      throw new UnauthorizedException();
+    }
   }
 }

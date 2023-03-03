@@ -12,8 +12,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOne(username);
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.findOne(email);
     if (user) {
       const checkIfCorrectPassword = await this.hashService.comparePassword(
         pass,
@@ -30,11 +30,10 @@ export class AuthService {
 
   async login(user: any) {
     const payload = {
-      username: user.username,
+      email: user.email,
       sub: user.id,
-      roleId: user.role,
+      roleId: user.roleId,
     };
-    console.log(payload);
     return {
       access_token: this.jwtService.sign(payload, { secret: 'test' }),
     };

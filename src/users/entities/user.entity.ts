@@ -38,3 +38,5 @@ export class User extends SoftDelete {
   @JoinColumn({ name: 'role_id' })
   roleId: Role;
 }
+
+export { Role };

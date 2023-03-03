@@ -1,5 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AppService } from './app.service';
+import { AdminAuto } from './users/dto/create-user.dto';
 
 @Controller()
 export class AppController {
@@ -9,4 +16,5 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
 }

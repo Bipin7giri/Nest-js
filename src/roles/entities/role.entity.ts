@@ -7,12 +7,14 @@ import {
   OneToMany,
   OneToOne,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity()
 export class Role extends SoftDelete {
-  @PrimaryColumn({
+  @PrimaryGeneratedColumn({
     type: 'bigint',
+    name: 'id',
   })
   id: number;
 

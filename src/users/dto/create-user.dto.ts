@@ -28,3 +28,8 @@ export class LoginDto {
   @IsEmail()
   email: string;
 }
+export class AdminAuto {
+  @ApiProperty()
+  @IsNotEmpty()
+  key: number;
+}
