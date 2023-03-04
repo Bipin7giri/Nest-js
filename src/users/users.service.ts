@@ -1,37 +1,57 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, Role } from 'src/AllEntites';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { HashService } from 'src/helper/hash.services';
-
+import {
+  FilterOperator,
+  PaginateQuery,
+  paginate,
+  Paginated,
+} from 'nestjs-paginate';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
-
     private hashService: HashService,
   ) {}
 
-  async registerUser(createUserDto: CreateUserDto) {
-    const newUser = this.userRepository.create(createUserDto);
-    const hashPassword = await this.hashService.hashPassword(newUser.password);
-    const roles = await this.roleRepository.findOne({
-      where: {
-        name: 'user',
+  public findAll(query: PaginateQuery): Promise<Paginated<User>> {
+    return paginate(query, this.userRepository, {
+      sortableColumns: ['id', 'username', 'email'],
+      relations: ['roleId'],
+      nullSort: 'last',
+      searchableColumns: ['username'],
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {
+        email: [FilterOperator.GTE, FilterOperator.LTE],
       },
     });
-    return this.userRepository.save({
-      username: newUser.username,
-      email: newUser.email,
-      password: hashPassword,
-      roleId: roles,
-    });
+  }
+
+  async registerUser(createUserDto: CreateUserDto) {
+    try {
+      const newUser = this.userRepository.create(createUserDto);
+      const hashPassword = await this.hashService.hashPassword(
+        newUser.password,
+      );
+      const roles = await this.roleRepository.findOne({
+        where: {
+          name: 'user',
+        },
+      });
+      return this.userRepository.save({
+        username: newUser.username,
+        email: newUser.email,
+        password: hashPassword,
+        roleId: roles,
+      });
+    } catch (err) {
+      throw new UnprocessableEntityException('email must be unique');
+      console.log(err);
+    }
   }
 
   getUsers() {

@@ -26,6 +26,7 @@ export class User extends SoftDelete {
     name: 'email_address',
     nullable: false,
     default: '',
+    unique: true,
   })
   email: string;
   @ApiProperty()

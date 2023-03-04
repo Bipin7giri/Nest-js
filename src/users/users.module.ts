@@ -5,13 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role, User } from '../AllEntites/index';
 import { HashService } from 'src/helper/hash.services';
 // import { AuthService } from 'src/services/auth.service';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { jwtConstants } from 'src/constants/jwtConstant';
+import { JwtService } from '@nestjs/jwt';
 import { LocalStrategy } from 'src/auth/local.strategy';
 import { AuthService } from 'src/auth/auth.service';
-import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
-import { AuthModule } from 'src/auth/auth.modules';
 @Module({
   imports: [TypeOrmModule.forFeature([User, Role])],
   controllers: [UsersController],

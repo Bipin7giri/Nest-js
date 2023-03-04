@@ -24,6 +24,8 @@ import { HasRoles } from 'src/auth/has-roles.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
 // import { Role } from './entities/user.entity';
 import { Role } from '../constants/roles.enum';
+import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { User } from './entities/user.entity';
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
@@ -31,6 +33,11 @@ export class UsersController {
     private readonly userService: UsersService,
     private authService: AuthService,
   ) {}
+
+  @Get('/paginate')
+  public findAll(@Paginate() query: PaginateQuery): Promise<Paginated<User>> {
+    return this.userService.findAll(query);
+  }
 
   @HasRoles(Role.User)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
