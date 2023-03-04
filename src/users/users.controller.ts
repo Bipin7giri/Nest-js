@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
-  ParseIntPipe,
   Post,
   UseGuards,
   UsePipes,
@@ -11,7 +9,7 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AdminAuto,
   CreateUserDto,
@@ -21,6 +19,7 @@ import { UsersService } from 'src/users/users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from 'src/auth/auth.service';
 import { HasRoles } from 'src/auth/has-roles.decorator';
+import { CurrentUser } from 'src/auth/current-user.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
 // import { Role } from './entities/user.entity';
 import { Role } from '../constants/roles.enum';
@@ -35,6 +34,7 @@ export class UsersController {
   ) {}
 
   @Get('/paginate')
+  @ApiQuery({ name: 'query' })
   public findAll(@Paginate() query: PaginateQuery): Promise<Paginated<User>> {
     return this.userService.findAll(query);
   }
@@ -43,13 +43,15 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get()
   getUsers(@Request() req) {
+    console.log(req);
     return this.userService.getUsers();
   }
-
-  @Get('id/:id')
-  findUsersById(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.findUsersById(id);
+  @Get('/me')
+  @UseGuards(AuthGuard('jwt'))
+  getUser(@CurrentUser() user: any) {
+    return user;
   }
+
   @Post('register')
   @UsePipes(ValidationPipe)
   createUsers(@Body() createUserDto: CreateUserDto) {
